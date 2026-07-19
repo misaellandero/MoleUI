@@ -78,7 +78,6 @@ final class CleanViewModel: ModuleViewModel {
                     guard let self else { return }
                     let (text, summary, failure) = Self.decodePreview(stdout: stdout)
                     DispatchQueue.main.async {
-                        guard let self else { return }
                         if let text, let summary {
                             self.previewOutput = text
                             self.previewSummary = summary
@@ -132,7 +131,6 @@ final class CleanViewModel: ModuleViewModel {
                     let cleaned = stdout.strippingANSISequences()
                     let summary = CleanPreviewSummary.parse(from: cleaned)
                     DispatchQueue.main.async {
-                        guard let self else { return }
                         self.previewOutput = cleaned
                         self.previewSummary = summary
                         let freedBytes = summary?.potentialSpaceBytes ?? expectedBytes

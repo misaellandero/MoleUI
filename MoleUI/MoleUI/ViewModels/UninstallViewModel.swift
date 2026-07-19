@@ -92,7 +92,6 @@ final class UninstallViewModel: ModuleViewModel {
                     guard let self else { return }
                     let decoded = Result { try JSONDecoder().decode([InstalledApp].self, from: Data(stdout.utf8)) }
                     DispatchQueue.main.async {
-                        guard let self else { return }
                         switch decoded {
                         case .success(let loadedApps):
                             self.apps = loadedApps
@@ -155,7 +154,7 @@ final class UninstallViewModel: ModuleViewModel {
                     let cleaned = stdout.strippingANSISequences()
                     let summary = UninstallPreviewSummary.parse(from: cleaned, fallbackSize: app.size)
                     DispatchQueue.main.async {
-                        guard let self, self.inspectedApp?.uninstallName == app.uninstallName else { return }
+                        guard self.inspectedApp?.uninstallName == app.uninstallName else { return }
                         self.previewOutput = cleaned
                         self.previewedAppName = app.uninstallName
                         self.pendingUninstallApp = showConfirmation ? app : nil
@@ -194,7 +193,6 @@ final class UninstallViewModel: ModuleViewModel {
                     guard let self else { return }
                     let cleaned = stdout.strippingANSISequences()
                     DispatchQueue.main.async {
-                        guard let self else { return }
                         self.previewOutput = cleaned
                         self.previewedAppName = app.uninstallName
                         self.pendingUninstallApp = nil
