@@ -93,10 +93,10 @@ struct DiskSpaceSummaryView: View {
                         Text(isScanning ? "Scanning" : "Live")
                     }
                     .font(.system(size: 12, weight: .medium))
-                    .foregroundStyle(isScanning ? .cyan : .green)
+                    .foregroundStyle(isScanning ? Color(red: 0.58, green: 0.42, blue: 1.0) : Color(red: 0.0, green: 0.82, blue: 0.52))
                     .padding(.horizontal, 10)
                     .padding(.vertical, 6)
-                    .background(Capsule().fill(Color(nsColor: .controlBackgroundColor)))
+                    .background(Capsule().fill(Color(red: 0.06, green: 0.10, blue: 0.26).opacity(0.80)))
                 }
 
                 HStack(spacing: 12) {
@@ -134,7 +134,7 @@ struct DiskSpaceSummaryView: View {
                 if !cleanupStats.recentApps.isEmpty {
                     HStack(spacing: 8) {
                         Image(systemName: "trash.circle.fill")
-                            .foregroundStyle(.cyan)
+                            .foregroundStyle(Color(red: 0.27, green: 0.60, blue: 1.0))
                         Text("Recently removed apps")
                             .font(.system(size: 12, weight: .semibold))
                         Text(cleanupStats.recentApps.joined(separator: ", "))
@@ -150,13 +150,13 @@ struct DiskSpaceSummaryView: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(
                 ZStack {
+                    RoundedRectangle(cornerRadius: 8)
+                        .fill(Color(red: 0.04, green: 0.07, blue: 0.20).opacity(0.82))
+                    RoundedRectangle(cornerRadius: 8)
+                        .fill(.ultraThinMaterial.opacity(0.22))
                     if VisualSettings.particlesEnabled {
-                        AmbientParticleBackdrop(seed: 1.35, intensity: isScanning ? 0.55 : 0.28)
+                        AmbientParticleBackdrop(seed: 1.35, intensity: isScanning ? 0.60 : 0.32)
                     }
-                    RoundedRectangle(cornerRadius: 8)
-                        .fill(.ultraThinMaterial)
-                    RoundedRectangle(cornerRadius: 8)
-                        .fill(Color(nsColor: .controlBackgroundColor).opacity(0.72))
                 }
                 .clipShape(.rect(cornerRadius: 8))
             )
@@ -166,7 +166,17 @@ struct DiskSpaceSummaryView: View {
                         TronLoopBorderView(cornerRadius: 8, lineWidth: 1.4)
                     } else {
                         RoundedRectangle(cornerRadius: 8)
-                            .stroke(Color.primary.opacity(0.08), lineWidth: 1)
+                            .stroke(
+                                LinearGradient(
+                                    colors: [
+                                        Color(red: 0.27, green: 0.55, blue: 1.0).opacity(0.30),
+                                        Color(red: 0.55, green: 0.38, blue: 1.0).opacity(0.14)
+                                    ],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                ),
+                                lineWidth: 1
+                            )
                     }
                 }
             )
@@ -185,7 +195,7 @@ struct DiskSpaceSummaryView: View {
         VStack(alignment: .leading, spacing: 6) {
             HStack(spacing: 6) {
                 Image(systemName: symbol)
-                    .foregroundStyle(.cyan)
+                    .foregroundStyle(Color(red: 0.27, green: 0.60, blue: 1.0))
                 Text(title)
                     .font(.system(size: 12, weight: .medium))
                     .foregroundStyle(.secondary)
@@ -205,7 +215,18 @@ struct DiskSpaceSummaryView: View {
         }
         .padding(12)
         .frame(maxWidth: .infinity, minHeight: actionTitle == nil ? 98 : 132, alignment: .leading)
-        .background(RoundedRectangle(cornerRadius: 8).fill(Color(nsColor: .windowBackgroundColor).opacity(0.62)))
+        .background(
+            ZStack {
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(Color(red: 0.06, green: 0.10, blue: 0.26).opacity(0.78))
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(.ultraThinMaterial.opacity(0.18))
+            }
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 8)
+                .stroke(Color(red: 0.27, green: 0.55, blue: 1.0).opacity(0.14), lineWidth: 1)
+        )
     }
 
     private func volumeRow(_ volume: DiskVolumeSummary, time: TimeInterval) -> some View {
@@ -220,7 +241,15 @@ struct DiskSpaceSummaryView: View {
                     RoundedRectangle(cornerRadius: 4)
                         .fill(Color.primary.opacity(0.08))
                     RoundedRectangle(cornerRadius: 4)
-                        .fill(LinearGradient(colors: [.cyan.opacity(0.75 + pulse), .blue.opacity(0.6 + pulse)], startPoint: .leading, endPoint: .trailing))
+                        .fill(LinearGradient(
+                            colors: [
+                                Color(red: 0.55, green: 0.36, blue: 1.0).opacity(0.72 + pulse * 0.28),
+                                Color(red: 0.20, green: 0.52, blue: 1.0).opacity(0.68 + pulse * 0.28),
+                                Color(red: 0.0, green: 0.82, blue: 1.0).opacity(0.62 + pulse * 0.28)
+                            ],
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        ))
                         .frame(width: max(6, geometry.size.width * volume.usedFraction))
                 }
             }
@@ -258,12 +287,14 @@ struct CelebrationButton: View {
                 .frame(maxWidth: .infinity)
                 .background(
                     Capsule()
-                        .fill(isEnabled ? Color.cyan.opacity(0.18) : Color.primary.opacity(0.06))
+                        .fill(isEnabled
+                            ? LinearGradient(colors: [Color(red: 0.55, green: 0.36, blue: 1.0).opacity(0.22), Color(red: 0.20, green: 0.52, blue: 1.0).opacity(0.18)], startPoint: .leading, endPoint: .trailing)
+                            : LinearGradient(colors: [Color.primary.opacity(0.06), Color.primary.opacity(0.06)], startPoint: .leading, endPoint: .trailing))
                 )
-                .foregroundStyle(isEnabled ? .cyan : .secondary)
+                .foregroundStyle(isEnabled ? Color(red: 0.27, green: 0.62, blue: 1.0) : .secondary)
                 .overlay(
                     Capsule()
-                        .stroke(isEnabled ? Color.cyan.opacity(0.45) : Color.primary.opacity(0.08), lineWidth: 1)
+                        .stroke(isEnabled ? Color(red: 0.40, green: 0.55, blue: 1.0).opacity(0.45) : Color.primary.opacity(0.08), lineWidth: 1)
                 )
                 .overlay {
                     if isCelebrating {
@@ -271,7 +302,7 @@ struct CelebrationButton: View {
                             .allowsHitTesting(false)
                     }
                 }
-                .shadow(color: isCelebrating ? .cyan.opacity(0.38) : .clear, radius: 14, x: 0, y: 0)
+                .shadow(color: isCelebrating ? Color(red: 0.55, green: 0.36, blue: 1.0).opacity(0.50) : .clear, radius: 16, x: 0, y: 0)
             }
             .buttonStyle(.plain)
             .disabled(!isEnabled)
@@ -301,7 +332,11 @@ struct SparkBurstView: View {
                 let size = CGFloat(3 + (index % 4))
                 let opacity = max(0, 1 - progress) * (0.55 + Double(index % 3) * 0.12)
                 let rect = CGRect(x: x - size / 2, y: y - size / 2, width: size, height: size)
-                let color: Color = index % 3 == 0 ? .white : (index % 3 == 1 ? .cyan : .blue)
+                let color: Color = index % 5 == 0 ? .white
+                    : index % 5 == 1 ? Color(red: 0.0, green: 0.85, blue: 1.0)
+                    : index % 5 == 2 ? Color(red: 0.55, green: 0.36, blue: 1.0)
+                    : index % 5 == 3 ? Color(red: 0.27, green: 0.60, blue: 1.0)
+                    : Color(red: 0.82, green: 0.72, blue: 1.0)
                 context.addFilter(.blur(radius: index % 2 == 0 ? 0.5 : 1.4))
                 context.fill(Path(ellipseIn: rect), with: .color(color.opacity(opacity * wave)))
             }
@@ -445,13 +480,13 @@ struct OptimizationPlanView: View {
         .frame(maxWidth: .infinity, minHeight: 156, alignment: .leading)
         .background(
             ZStack {
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(Color(red: 0.05, green: 0.09, blue: 0.24).opacity(0.80))
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(.ultraThinMaterial.opacity(0.20))
                 if VisualSettings.particlesEnabled {
                     AmbientParticleBackdrop(seed: Double(index) * 1.73 + 4.2, intensity: isRefreshing ? 0.5 : 0.25)
                 }
-                RoundedRectangle(cornerRadius: 8)
-                    .fill(.ultraThinMaterial)
-                RoundedRectangle(cornerRadius: 8)
-                    .fill(Color(nsColor: .controlBackgroundColor).opacity(0.74))
             }
             .clipShape(.rect(cornerRadius: 8))
         )

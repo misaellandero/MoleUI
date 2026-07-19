@@ -21,7 +21,8 @@ struct AmbientCLIView: View {
             VStack(spacing: 0) {
                 LinearGradient(
                     colors: [
-                        Color(red: 0.0, green: 0.55, blue: 1.0).opacity(isRunning ? 0.45 : 0.18),
+                        Color(red: 0.55, green: 0.36, blue: 1.0).opacity(isRunning ? 0.55 : 0.22),
+                        Color(red: 0.27, green: 0.58, blue: 1.0).opacity(isRunning ? 0.40 : 0.10),
                         Color.clear
                     ],
                     startPoint: .leading,
@@ -44,8 +45,9 @@ struct AmbientCLIView: View {
                 .stroke(
                     LinearGradient(
                         colors: [
-                            Color(red: 0.0, green: 0.55, blue: 1.0).opacity(isRunning ? 0.4 : 0.15),
-                            Color(red: 0.0, green: 0.3, blue: 0.6).opacity(isRunning ? 0.2 : 0.08)
+                            Color(red: 0.55, green: 0.36, blue: 1.0).opacity(isRunning ? 0.50 : 0.18),
+                            Color(red: 0.27, green: 0.58, blue: 1.0).opacity(isRunning ? 0.30 : 0.10),
+                            Color(red: 0.0, green: 0.82, blue: 1.0).opacity(isRunning ? 0.20 : 0.05)
                         ],
                         startPoint: .topLeading,
                         endPoint: .bottomTrailing
@@ -110,9 +112,9 @@ private struct AmbientCLILineRow: View {
 
     private var dotColor: Color {
         switch line.status {
-        case .ok:      return Color(red: 0.0, green: 0.85, blue: 0.38)
-        case .running: return Color(red: 0.18, green: 0.70, blue: 1.0)
-        case .dim:     return Color(red: 0.0, green: 0.45, blue: 0.85).opacity(0.55)
+        case .ok:      return Color(red: 0.0, green: 0.82, blue: 0.52)
+        case .running: return Color(red: 0.55, green: 0.36, blue: 1.0)
+        case .dim:     return Color(red: 0.20, green: 0.45, blue: 0.90).opacity(0.50)
         case .warning: return Color(red: 1.0, green: 0.60, blue: 0.04)
         }
     }
@@ -154,7 +156,7 @@ private struct AmbientCLILineRow: View {
                     .foregroundStyle(
                         line.status == .warning
                             ? Color(red: 1.0, green: 0.60, blue: 0.04).opacity(0.9)
-                            : Color(red: 0.18, green: 0.70, blue: 1.0)
+                            : Color(red: 0.55, green: 0.36, blue: 1.0)
                     )
             }
         }
