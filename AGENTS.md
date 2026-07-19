@@ -6,6 +6,22 @@ This file is the shared source of truth for any AI agent working on this repo (C
 
 Mole is a macOS system cleanup and optimization tool with shell and Go components. It performs file cleanup, app protection checks, and maintenance tasks, so safety rules matter more than speed.
 
+## Native macOS UI Direction
+
+Mole is planned to gain a native macOS UI built with AppKit. The UI should feel fully native, fast, highly polished, and competitive with CleanMyMac while preserving Mole's conservative safety model.
+
+- Use `docs/UI_ROADMAP.md` as the planning source for Libella scope, phases, architecture direction, and safety checkpoints.
+- Use GitHub Issues, Milestones, and Releases to track Libella work, release blockers, shipped builds, and user-facing changelogs.
+- Libella bundles the Mole CLI runtime in app Resources, including `mo`, `mole`, `bin/`, `lib/`, and runtime support directories; prefer that bundled runtime over requiring a separate CLI install.
+- Libella is not targeting Mac App Store distribution. Keep the main cleanup app unsandboxed unless a future architecture explicitly separates privileged/helper behavior.
+- Prefer AppKit-native controls, window chrome, menus, keyboard behavior, accessibility, and system appearance integration over custom web-like UI patterns.
+- Keep the experience responsive. Long-running scans, cleanup previews, and deletion work must run off the main thread with clear progress and cancellation.
+- Treat destructive actions as preview-first workflows. Show what will be removed, why it is safe, and require explicit confirmation before cleanup.
+- Route UI-initiated deletion through the same safe shell/core helpers used by the CLI, including Trash routing, dry-run/test behavior, path protection, app protection, and operation logging.
+- Match macOS design conventions for sidebar navigation, toolbar actions, table/list selection, sheets, alerts, preferences, and empty/error states.
+- Polish matters: consistent spacing, crisp typography, useful animation only where it clarifies state, native dark/light mode support, and no laggy or surprising interactions.
+- The UI may compete on presentation, but it must not weaken Mole's cleanup safety guarantees to appear more aggressive.
+
 ## Repository Map
 
 - `mole` - main shell entrypoint.

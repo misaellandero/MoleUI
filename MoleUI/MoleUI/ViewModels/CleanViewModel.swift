@@ -172,6 +172,7 @@ final class CleanViewModel: ModuleViewModel {
         let cleanText = output.text.strippingANSISequences()
         if !cleanText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
             streamingOutput += cleanText
+            notify()
         }
         if let line = CommandOutputParser.compactProgressLine(from: cleanText) {
             let now = Date()

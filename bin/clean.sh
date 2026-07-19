@@ -23,6 +23,7 @@ source "$SCRIPT_DIR/../lib/clean/user.sh"
 
 SYSTEM_CLEAN=false
 DRY_RUN=false
+OUTPUT_JSON=false
 PROTECT_FINDER_METADATA=false
 EXTERNAL_VOLUME_TARGET=""
 IS_M_SERIES=$([[ "$(uname -m)" == "arm64" ]] && echo "true" || echo "false")
@@ -150,6 +151,106 @@ PROJECT_ARTIFACT_HINT_ESTIMATED_KB=0
 PROJECT_ARTIFACT_HINT_ESTIMATE_SAMPLES=0
 PROJECT_ARTIFACT_HINT_ESTIMATE_PARTIAL=false
 declare -a DRY_RUN_SEEN_IDENTITIES=()
+declare -a CLEAN_JSON_CATEGORY_SECTIONS=()
+declare -a CLEAN_JSON_CATEGORY_LABELS=()
+declare -a CLEAN_JSON_CATEGORY_SIZE_KB=()
+declare -a CLEAN_JSON_CATEGORY_ITEMS=()
+
+clean_json_escape() {
+    local input="${1:-}"
+    input=${input//\\/\\\\}
+    input=${input//\"/\\\"}
+    input=${input//$'\n'/\\n}
+    input=${input//$'\r'/\\r}
+    input=${input//$'\t'/\\t}
+    printf '%s' "$input"
+}
+
+clean_json_string() {
+    printf '"%s"' "$(clean_json_escape "${1:-}")"
+}
+
+clean_json_bool() {
+    if [[ "${1:-false}" == "true" || "${1:-0}" == "1" ]]; then
+        printf 'true'
+    else
+        printf 'false'
+    fi
+}
+
+record_clean_json_category() {
+    local section="${CURRENT_SECTION:-Uncategorized}"
+    local label="$1"
+    local size_kb="$2"
+    local item_count="$3"
+
+    CLEAN_JSON_CATEGORY_SECTIONS+=("$section")
+    CLEAN_JSON_CATEGORY_LABELS+=("$label")
+    CLEAN_JSON_CATEGORY_SIZE_KB+=("$size_kb")
+    CLEAN_JSON_CATEGORY_ITEMS+=("$item_count")
+}
+
+emit_clean_json() {
+    local status="${1:-success}"
+    local size_human
+    size_human=$(bytes_to_human_kb "$total_size_cleaned")
+    local json_category_count="${#CLEAN_JSON_CATEGORY_LABELS[@]}"
+
+    printf '{\n'
+    printf '  "schema_version": 1,\n'
+    printf '  "command": "clean",\n'
+    printf '  "status": '
+    clean_json_string "$status"
+    printf ',\n'
+    printf '  "dry_run": '
+    clean_json_bool "$DRY_RUN"
+    printf ',\n'
+    printf '  "summary": {\n'
+    printf '    "estimated_size_kb": %d,\n' "$total_size_cleaned"
+    printf '    "estimated_size": '
+    clean_json_string "$size_human"
+    printf ',\n'
+    printf '    "items": %d,\n' "$files_cleaned"
+    printf '    "categories": %d,\n' "$json_category_count"
+    printf '    "whitelist_skipped": %d,\n' "$whitelist_skipped_count"
+    printf '    "export_list_file": '
+    if [[ "$DRY_RUN" == "true" ]]; then
+        clean_json_string "$EXPORT_LIST_FILE"
+    else
+        printf 'null'
+    fi
+    printf '\n'
+    printf '  },\n'
+    printf '  "categories": [\n'
+    local idx
+    for idx in "${!CLEAN_JSON_CATEGORY_LABELS[@]}"; do
+        [[ $idx -gt 0 ]] && printf ',\n'
+        printf '    {\n'
+        printf '      "section": '
+        clean_json_string "${CLEAN_JSON_CATEGORY_SECTIONS[$idx]}"
+        printf ',\n'
+        printf '      "label": '
+        clean_json_string "${CLEAN_JSON_CATEGORY_LABELS[$idx]}"
+        printf ',\n'
+        printf '      "size_kb": %d,\n' "${CLEAN_JSON_CATEGORY_SIZE_KB[$idx]}"
+        printf '      "size": '
+        clean_json_string "$(bytes_to_human_kb "${CLEAN_JSON_CATEGORY_SIZE_KB[$idx]}")"
+        printf ',\n'
+        printf '      "items": %d\n' "${CLEAN_JSON_CATEGORY_ITEMS[$idx]}"
+        printf '    }'
+    done
+    printf '\n'
+    printf '  ],\n'
+    printf '  "warnings": ['
+    if [[ ${#WHITELIST_WARNINGS[@]} -gt 0 ]]; then
+        for idx in "${!WHITELIST_WARNINGS[@]}"; do
+            [[ $idx -gt 0 ]] && printf ', '
+            clean_json_string "Whitelist: ${WHITELIST_WARNINGS[$idx]}"
+        done
+    fi
+    printf ']\n'
+    printf '}\n'
+}
 
 # shellcheck disable=SC2329
 note_activity() {
@@ -867,6 +968,7 @@ safe_clean() {
         files_cleaned=$((files_cleaned + total_count))
         total_size_cleaned=$((total_size_cleaned + total_size_kb))
         total_items=$((total_items + 1))
+        record_clean_json_category "$label" "$total_size_kb" "$total_count"
         note_activity
     fi
 
@@ -1368,6 +1470,9 @@ main() {
                 DRY_RUN=true
                 export MOLE_DRY_RUN=1
                 ;;
+            "--json")
+                OUTPUT_JSON=true
+                ;;
             "--external")
                 shift
                 if [[ $# -eq 0 ]]; then
@@ -1400,10 +1505,22 @@ main() {
         shift
     done
 
-    start_cleanup
-    hide_cursor
-    perform_cleanup
-    show_cursor
+    if [[ "$OUTPUT_JSON" == "true" ]]; then
+        local clean_output_file
+        clean_output_file=$(create_temp_file)
+        if start_cleanup > "$clean_output_file" && perform_cleanup >> "$clean_output_file"; then
+            emit_clean_json "success"
+        else
+            local clean_status=$?
+            emit_clean_json "failed"
+            exit "$clean_status"
+        fi
+    else
+        start_cleanup
+        hide_cursor
+        perform_cleanup
+        show_cursor
+    fi
     exit 0
 }
 

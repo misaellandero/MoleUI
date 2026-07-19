@@ -233,6 +233,28 @@ EOF
     [ -f "$HOME/Library/Caches/TestApp/cache.tmp" ]
 }
 
+@test "mo clean --dry-run --json emits stable machine-readable preview contract" {
+    run env HOME="$HOME" MOLE_TEST_MODE=1 "$PROJECT_ROOT/mole" clean --dry-run --json
+    [ "$status" -eq 0 ]
+
+    JSON_OUTPUT="$output" node <<'NODE'
+const report = JSON.parse(process.env.JSON_OUTPUT);
+if (report.schema_version !== 1) throw new Error("schema_version");
+if (report.command !== "clean") throw new Error("command");
+if (report.status !== "success") throw new Error("status");
+if (report.dry_run !== true) throw new Error("dry_run");
+if (!report.summary) throw new Error("summary");
+if (typeof report.summary.estimated_size_kb !== "number") throw new Error("estimated_size_kb");
+if (typeof report.summary.estimated_size !== "string") throw new Error("estimated_size");
+if (typeof report.summary.items !== "number") throw new Error("items");
+if (typeof report.summary.categories !== "number") throw new Error("categories");
+if (typeof report.summary.whitelist_skipped !== "number") throw new Error("whitelist_skipped");
+if (typeof report.summary.export_list_file !== "string") throw new Error("export_list_file");
+if (!Array.isArray(report.categories)) throw new Error("categories array");
+if (!Array.isArray(report.warnings)) throw new Error("warnings array");
+NODE
+}
+
 @test "mo clean --dry-run reports stale login item without deleting it" {
     mkdir -p "$HOME/Library/LaunchAgents"
     cat > "$HOME/Library/LaunchAgents/com.example.stale.plist" <<'PLIST'
