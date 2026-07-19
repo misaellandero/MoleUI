@@ -17,6 +17,7 @@ final class CleanViewModel: ModuleViewModel {
     var progressTargetBytes: Int64 = 0
     var lastProgressLine: String = "Waiting for command output..."
     var progressLineIsError: Bool = false
+    var streamingOutput: String = ""
     var onChange: (() -> Void)?
 
     // Called by the coordinator after a successful clean so Overview can update.
@@ -56,6 +57,7 @@ final class CleanViewModel: ModuleViewModel {
         progressTargetBytes = 0
         lastProgressLine = status
         lastProgressLineUpdate = .distantPast
+        streamingOutput = ""
         statusMessage = status
         notify()
 
@@ -110,6 +112,7 @@ final class CleanViewModel: ModuleViewModel {
         notify()
 
         let expectedBytes = expectedSummary?.potentialSpaceBytes
+        streamingOutput = ""
 
         currentTask = commandRunner.run(
             .cleanRun,
@@ -167,6 +170,9 @@ final class CleanViewModel: ModuleViewModel {
 
     private func handleOutput(_ output: MoleCommandOutput) {
         let cleanText = output.text.strippingANSISequences()
+        if !cleanText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            streamingOutput += cleanText
+        }
         if let line = CommandOutputParser.compactProgressLine(from: cleanText) {
             let now = Date()
             let isError = output.stream == .stderr

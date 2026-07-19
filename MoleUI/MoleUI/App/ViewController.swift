@@ -57,8 +57,8 @@ final class ViewController: NSSplitViewController {
 
         window.title = "Libella"
         window.subtitle = contentController.module.title
-        window.minSize = NSSize(width: 1040, height: 700)
-        window.setContentSize(NSSize(width: 1220, height: 780))
+        window.minSize = NSSize(width: 820, height: 580)
+        window.setContentSize(NSSize(width: 960, height: 660))
         window.styleMask.insert(.fullSizeContentView)
         window.titlebarAppearsTransparent = true
         window.titleVisibility = .hidden

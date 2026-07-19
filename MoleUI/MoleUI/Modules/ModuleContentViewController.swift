@@ -456,8 +456,13 @@ final class ModuleContentViewController: NSViewController {
     private func updatePreviewText() {
         switch module {
         case .clean:
-            previewTextView.string = cleanVM.previewOutput
-                ?? "Run a preview to inspect the exact clean output before freeing space."
+            if cleanVM.isRunning && !cleanVM.streamingOutput.isEmpty {
+                previewTextView.string = cleanVM.streamingOutput
+                previewTextView.scrollToEndOfDocument(nil)
+            } else {
+                previewTextView.string = cleanVM.previewOutput
+                    ?? "Run a preview to inspect the exact clean output before freeing space."
+            }
         case .uninstall:
             if let preview = uninstallVM.previewOutput,
                uninstallVM.previewedAppName == uninstallVM.inspectedApp?.uninstallName {
