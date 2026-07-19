@@ -642,7 +642,7 @@ final class ModuleContentViewController: NSViewController {
             ]
         case .clean:
             return [
-                DetailRowView(symbolName: "list.bullet.rectangle", title: "Optional CLI output", detail: "Raw command output is hidden by default and can be shown when needed."),
+                DetailRowView(symbolName: "waveform", title: "Live output", detail: "CLI lines flow in as they arrive and fade naturally after the run completes."),
                 DetailRowView(symbolName: "exclamationmark.shield", title: "Authorization policy", detail: "The app keeps sudo-only cleanup out of the automatic flow so it never blocks on auth."),
                 DetailRowView(symbolName: "trash", title: "Runtime path", detail: "Real cleanup still runs through the audited command path, not AppKit-only code.")
             ]
@@ -729,7 +729,7 @@ final class ModuleContentViewController: NSViewController {
         commandProgressContainer.translatesAutoresizingMaskIntoConstraints = false
         commandProgressContainer.wantsLayer = true
         commandProgressContainer.layer?.cornerRadius = 8
-        commandProgressContainer.layer?.backgroundColor = NSColor.controlBackgroundColor.withAlphaComponent(0.64).cgColor
+        commandProgressContainer.layer?.backgroundColor = NSColor(calibratedRed: 0.06, green: 0.10, blue: 0.26, alpha: 0.85).cgColor
         commandProgressContainer.isHidden = true
 
         commandProgressIndicator.style = .spinning
@@ -791,7 +791,7 @@ final class ModuleContentViewController: NSViewController {
         operationEffectContainer.translatesAutoresizingMaskIntoConstraints = false
         operationEffectContainer.wantsLayer = true
         operationEffectContainer.layer?.cornerRadius = 8
-        operationEffectContainer.layer?.backgroundColor = NSColor.controlBackgroundColor.cgColor
+        operationEffectContainer.layer?.backgroundColor = NSColor(calibratedRed: 0.06, green: 0.10, blue: 0.26, alpha: 0.85).cgColor
         operationEffectContainer.isHidden = true
 
         let effectView = NSHostingView(rootView: OperationEffectView(title: "Working", subtitle: "Preparing a safe operation."))

@@ -362,7 +362,9 @@ final class AppInspectorView: NSView {
     private func configure() {
         wantsLayer = true
         layer?.cornerRadius = 8
-        layer?.backgroundColor = NSColor.controlBackgroundColor.cgColor
+        layer?.backgroundColor = NSColor(calibratedRed: 0.06, green: 0.10, blue: 0.26, alpha: 0.88).cgColor
+        layer?.borderColor = NSColor(calibratedRed: 0.27, green: 0.55, blue: 1.0, alpha: 0.20).cgColor
+        layer?.borderWidth = 1
 
         cardBorderView.translatesAutoresizingMaskIntoConstraints = false
         cardBorderView.isHidden = true

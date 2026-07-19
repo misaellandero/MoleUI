@@ -13,10 +13,10 @@ struct AmbientCLIView: View {
     var body: some View {
         ZStack(alignment: .topLeading) {
             RoundedRectangle(cornerRadius: 10)
-                .fill(Color(red: 0.0, green: 0.07, blue: 0.18).opacity(0.72))
+                .fill(Color(red: 0.06, green: 0.11, blue: 0.28))
 
             RoundedRectangle(cornerRadius: 10)
-                .fill(.ultraThinMaterial.opacity(0.25))
+                .fill(.ultraThinMaterial.opacity(0.12))
 
             VStack(spacing: 0) {
                 LinearGradient(
@@ -59,15 +59,27 @@ struct AmbientCLIView: View {
     }
 
     private var emptyState: some View {
-        HStack(spacing: 8) {
-            Circle()
-                .fill(Color(red: 0.0, green: 0.45, blue: 0.85).opacity(0.35))
-                .frame(width: 6, height: 6)
-            Text(placeholder)
-                .font(.system(size: 12, design: .monospaced))
-                .foregroundStyle(Color.white.opacity(0.22))
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(spacing: 8) {
+                Circle()
+                    .fill(Color(red: 0.55, green: 0.36, blue: 1.0).opacity(0.45))
+                    .frame(width: 6, height: 6)
+                    .shadow(color: Color(red: 0.55, green: 0.36, blue: 1.0).opacity(0.6), radius: 4)
+                Text(placeholder)
+                    .font(.system(size: 12, design: .monospaced))
+                    .foregroundStyle(Color.white.opacity(0.38))
+            }
+            HStack(spacing: 16) {
+                ForEach(0..<3, id: \.self) { i in
+                    RoundedRectangle(cornerRadius: 3)
+                        .fill(Color(red: 0.27, green: 0.55, blue: 1.0).opacity(0.07 + Double(i) * 0.025))
+                        .frame(height: 6)
+                }
+            }
+            .frame(maxWidth: 220)
         }
-        .padding(14)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .padding(16)
     }
 
     private var linesScrollView: some View {
