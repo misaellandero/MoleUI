@@ -466,3 +466,21 @@ struct OptimizationPlanItem {
     let color: NSColor
     let targetModule: AppModule
 }
+
+nonisolated struct CLILine: Identifiable, Equatable, Sendable {
+    enum Status: Equatable, Sendable {
+        case ok, running, dim, warning
+    }
+
+    let id: UUID
+    let text: String
+    let sizeText: String?
+    let status: Status
+
+    init(_ text: String, sizeText: String? = nil, status: Status = .dim) {
+        self.id = UUID()
+        self.text = text
+        self.sizeText = sizeText
+        self.status = status
+    }
+}

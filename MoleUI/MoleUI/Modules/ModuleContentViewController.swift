@@ -71,6 +71,8 @@ final class ModuleContentViewController: NSViewController {
     private let detailContainer = NSStackView()
     private let ambientBackgroundContainer = NSView()
     private var ambientBackgroundView: NSHostingView<GlobalAmbientBackgroundView>?
+    private let ambientCLIContainer = NSView()
+    private var ambientCLIHostingView: NSHostingView<AmbientCLIView>?
     private let contentScrollView = NSScrollView()
     private let contentDocumentView = NSView()
 
@@ -385,9 +387,10 @@ final class ModuleContentViewController: NSViewController {
         selectionContainer.isHidden = true
         appCatalogControls.isHidden = module != .uninstall
         appCatalogStack.isHidden = module != .uninstall
-        showCLIOutputButton.isHidden = module == .overview || module == .history
+        showCLIOutputButton.isHidden = module == .overview || module == .history || module == .clean
         showCLIOutputButton.state = showCLIOutput ? .on : .off
-        previewScrollView.isHidden = !showCLIOutput || module == .overview || module == .history
+        previewScrollView.isHidden = !showCLIOutput || module == .overview || module == .history || module == .clean
+        ambientCLIContainer.isHidden = module != .clean
 
         switch module {
         case .uninstall:
@@ -456,13 +459,11 @@ final class ModuleContentViewController: NSViewController {
     private func updatePreviewText() {
         switch module {
         case .clean:
-            if cleanVM.isRunning && !cleanVM.streamingOutput.isEmpty {
-                previewTextView.string = cleanVM.streamingOutput
-                previewTextView.scrollToEndOfDocument(nil)
-            } else {
-                previewTextView.string = cleanVM.previewOutput
-                    ?? "Run a preview to inspect the exact clean output before freeing space."
-            }
+            ambientCLIHostingView?.rootView = AmbientCLIView(
+                lines: cleanVM.cliLines,
+                isRunning: cleanVM.isRunning,
+                placeholder: "Run a preview to inspect cleanup output before freeing space."
+            )
         case .uninstall:
             if let preview = uninstallVM.previewOutput,
                uninstallVM.previewedAppName == uninstallVM.inspectedApp?.uninstallName {
@@ -846,6 +847,20 @@ final class ModuleContentViewController: NSViewController {
         previewScrollView.documentView = previewTextView
         previewScrollView.translatesAutoresizingMaskIntoConstraints = false
 
+        ambientCLIContainer.translatesAutoresizingMaskIntoConstraints = false
+        ambientCLIContainer.wantsLayer = true
+        ambientCLIContainer.isHidden = true
+        let cliHost = NSHostingView(rootView: AmbientCLIView(lines: [], isRunning: false, placeholder: "Run a preview to inspect cleanup output before freeing space."))
+        cliHost.translatesAutoresizingMaskIntoConstraints = false
+        ambientCLIContainer.addSubview(cliHost)
+        ambientCLIHostingView = cliHost
+        NSLayoutConstraint.activate([
+            cliHost.leadingAnchor.constraint(equalTo: ambientCLIContainer.leadingAnchor),
+            cliHost.trailingAnchor.constraint(equalTo: ambientCLIContainer.trailingAnchor),
+            cliHost.topAnchor.constraint(equalTo: ambientCLIContainer.topAnchor),
+            cliHost.bottomAnchor.constraint(equalTo: ambientCLIContainer.bottomAnchor)
+        ])
+
         appCatalogStack.orientation = .vertical
         appCatalogStack.alignment = .leading
         appCatalogStack.spacing = 12
@@ -877,6 +892,7 @@ final class ModuleContentViewController: NSViewController {
         rootStack.addArrangedSubview(appCatalogControls)
         rootStack.addArrangedSubview(appCatalogStack)
         rootStack.addArrangedSubview(showCLIOutputButton)
+        rootStack.addArrangedSubview(ambientCLIContainer)
         rootStack.addArrangedSubview(previewScrollView)
         rootStack.addArrangedSubview(statusContainer)
         rootStack.addArrangedSubview(detailContainer)
@@ -916,6 +932,8 @@ final class ModuleContentViewController: NSViewController {
             appCatalogStack.widthAnchor.constraint(greaterThanOrEqualToConstant: 760),
             previewScrollView.widthAnchor.constraint(greaterThanOrEqualToConstant: 760),
             previewScrollView.heightAnchor.constraint(equalToConstant: 240),
+            ambientCLIContainer.widthAnchor.constraint(greaterThanOrEqualToConstant: 760),
+            ambientCLIContainer.heightAnchor.constraint(equalToConstant: 240),
             statusContainer.widthAnchor.constraint(greaterThanOrEqualToConstant: 760)
         ])
     }

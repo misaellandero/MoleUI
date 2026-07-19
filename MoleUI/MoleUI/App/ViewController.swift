@@ -63,6 +63,8 @@ final class ViewController: NSSplitViewController {
         window.titlebarAppearsTransparent = true
         window.titleVisibility = .hidden
         window.toolbarStyle = .unified
+        window.appearance = NSAppearance(named: .darkAqua)
+        window.backgroundColor = NSColor(calibratedRed: 0.035, green: 0.07, blue: 0.14, alpha: 1.0)
 
         if window.toolbar == nil {
             toolbarDelegate.onPrimaryAction = { [weak self] in

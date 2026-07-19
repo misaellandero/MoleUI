@@ -18,6 +18,7 @@ final class CleanViewModel: ModuleViewModel {
     var lastProgressLine: String = "Waiting for command output..."
     var progressLineIsError: Bool = false
     var streamingOutput: String = ""
+    var cliLines: [CLILine] = []
     var onChange: (() -> Void)?
 
     // Called by the coordinator after a successful clean so Overview can update.
@@ -58,6 +59,7 @@ final class CleanViewModel: ModuleViewModel {
         lastProgressLine = status
         lastProgressLineUpdate = .distantPast
         streamingOutput = ""
+        cliLines = []
         statusMessage = status
         notify()
 
@@ -113,6 +115,7 @@ final class CleanViewModel: ModuleViewModel {
 
         let expectedBytes = expectedSummary?.potentialSpaceBytes
         streamingOutput = ""
+        cliLines = []
 
         currentTask = commandRunner.run(
             .cleanRun,
@@ -172,6 +175,17 @@ final class CleanViewModel: ModuleViewModel {
         let cleanText = output.text.strippingANSISequences()
         if !cleanText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
             streamingOutput += cleanText
+            let newParsed = CommandOutputParser.parseCLILines(from: cleanText)
+            if !newParsed.isEmpty {
+                if let lastIdx = cliLines.indices.last, cliLines[lastIdx].status == .running {
+                    let prev = cliLines[lastIdx]
+                    cliLines[lastIdx] = CLILine(prev.text, sizeText: prev.sizeText, status: .ok)
+                }
+                cliLines.append(contentsOf: newParsed.dropLast())
+                let last = newParsed[newParsed.index(before: newParsed.endIndex)]
+                cliLines.append(CLILine(last.text, sizeText: last.sizeText, status: .running))
+                if cliLines.count > 60 { cliLines = Array(cliLines.suffix(60)) }
+            }
             notify()
         }
         if let line = CommandOutputParser.compactProgressLine(from: cleanText) {
